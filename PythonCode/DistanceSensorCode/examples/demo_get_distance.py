@@ -1,9 +1,6 @@
 # -*- coding:utf-8 -*-
 
 '''!
-  @file demo_get_distance.py
-  @brief Get ranging data.
-  @n Connect board with raspberryPi.
   @n --------------------------------------------
   @n sensor pin |         raspberry pi          |
   @n     VCC    |            5V/3V3             |
@@ -11,13 +8,6 @@
   @n     RX     |          (BCM)14 TX           |
   @n     TX     |          (BCM)15 RX           |
   @n --------------------------------------------
-  @n
-  @Copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license     The MIT License (MIT)
-  @author [Arya](xue.peng@dfrobot.com)
-  @version  V1.0
-  @date  2019-8-31
-  @url https://github.com/DFRobot/DFRobot_RaspberryPi_A02YYUW
 '''
 
 import sys
@@ -27,7 +17,9 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
+from w1thermsensor import W1ThermSensor
 
+sensor = W1ThermSensor()
 board = Board()
 
 def print_distance(dis):
@@ -54,4 +46,7 @@ if __name__ == "__main__":
     distance = board.getDistance()
     print_distance(distance)
     #Delay time < 0.6s
-    time.sleep(0.3) 
+    time.sleep(0.3)
+    temperature = sensor.get_temperature()
+    print("The temp is  %s celcius" % temperature)
+    time.sleep(1)

@@ -1,16 +1,5 @@
 # -*- coding:utf-8 -*-
 
-'''!
-  @file DFRobot_RaspberryPi_A02YYUW.py
-  @brief Ranging distance sensor。
-  @copyright   Copyright (c) 2010 DFRobot Co.Ltd (http://www.dfrobot.com)
-  @license     The MIT License (MIT)
-  @author      Arya(xue.peng@dfrobot.com)
-  @version     V1.0
-  @date        2021-08-30
-  @url https://github.com/DFRobot/DFRobot_RaspberryPi_A02YYUW
-'''
-
 import serial
 
 import time

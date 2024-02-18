@@ -13,7 +13,49 @@
 import sys
 import os
 import time
+import socket
+import re
 
+def clientFunc():
+  s = socket.socket()  # Create a socket object
+  port = 8080  # Reserve a port for your service every new transfer wants a new port or you must wait.
+
+  s.connect(('localhost', port))
+  x = 0
+
+  st = str(x)
+  byt = st.encode()
+  s.send(byt)
+
+  # send message for hundred times
+  while x < 100:
+    st = str(x)
+    byt = st.encode()
+    s.send(byt)
+    print(x)
+
+    data = s.recv(1024)
+    if data:
+      print(data)
+      x += 1
+      break
+    else:
+      print('no data received')
+
+  print('closing')
+  s.close()
+  
+def distanceData():
+  distance = board.getDistance()
+  print_distance(distance)
+  #Delay time < 0.6s
+  time.sleep(0.3)
+    
+def temperatureData():
+  temperature = sensor.get_temperature()
+  print("The temp is  %s celcius" % temperature)
+  time.sleep(1)
+  
 sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 
 from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
@@ -42,11 +84,9 @@ if __name__ == "__main__":
   #Highest ranging threshold: 4500mm  
   dis_max = 4500 
   board.set_dis_range(dis_min, dis_max)
+
+  
   while True:
-    distance = board.getDistance()
-    print_distance(distance)
-    #Delay time < 0.6s
-    time.sleep(0.3)
-    temperature = sensor.get_temperature()
-    print("The temp is  %s celcius" % temperature)
-    time.sleep(1)
+    distanceData()
+    temperatureData()
+    

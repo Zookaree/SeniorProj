@@ -1,6 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 
-import RPi.GPIO as GPIO
 import socket
 import sys
 import datetime
@@ -16,6 +15,16 @@ global UDP_PORT
 UDP_PORT = 2345
 BUFF_SIZE = 1024
 
+def proc_request(cmd, sock, requester) : 
+    #convert the cmd to a string
+    cmd = bytes.decode(cmd, 'utf-8')
+    now = datetime.datetime.now()
+    print(now, "Processing: " + cmd)
+    cmd = cmd.split()
+    if cmd[0] == "test":
+        print("This is a test print to let you\
+        know that the server was established")
+
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         UDP_PORT = int(sys.argv[1])
@@ -29,20 +38,11 @@ if __name__ == '__main__':
     #get data from client, addr is who sent it (i.e. rpi client)
     #FOR UDP CONNECTIONS, LISTEN AND ACCEPT DO NOT NEED TO HAPPEN
     #BECASUSE UDP YOU DONT NEED TO VERIFY A CONNECTIONS
-    #sock.listen()
-    #conn, address = sock.accept()
-    data, addr = sock.recvfrom(BUFF_SIZE) 
-    
-    print("Connected to address:", address)
     
     try:
         while True:
-            result = instance.read();
-            if result.is_valid():
-                print("Last Valid Input: " + str(datetime.datetime.now()))
-                print("Server sent data!!")
-                conn.send(0)
-                time.sleep(6)
+            data, addr = sock.recvfrom(BUFF_SIZE) 
+            proc_request(data, sock, addr)
         
     except KeyboardInterrupt:
         print("Failed. Cleaning GPIO")

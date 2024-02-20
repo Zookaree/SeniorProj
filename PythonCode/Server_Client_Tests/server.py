@@ -3,6 +3,11 @@ import socket
 import sys
 import datetime
 import time
+#Need to import Temperature Sensor and Distance Sensor Data eventually
+#Probably Motor as well if possible
+#Will also need to incoroporate some other libraries to consider
+#other items such as joystick, etc.
+
 
 UDP_IP = '127.0.0.1'
 global UDP_PORT

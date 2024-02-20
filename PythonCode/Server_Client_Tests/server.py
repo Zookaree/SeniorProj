@@ -1,6 +1,8 @@
+import RPi.GPIO as GPIO
 import socket
 import sys
 import datetime
+import time
 
 UDP_IP = '127.0.0.1'
 global UDP_PORT
@@ -17,9 +19,25 @@ if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Internet UDP
     sock.bind((UDP_IP, UDP_PORT))
     
-    while True:
-        #get data from client, addr is who sent it (i.e. rpi client)
-        sock.listen(9)
-        conn, address = soc.accept()
-        data, addr = sock.recvfrom(BUFF_SIZE) 
+    #get data from client, addr is who sent it (i.e. rpi client)
+    sock.listen(9)
+    conn, address = sock.accept()
+    #data, addr = sock.recvfrom(BUFF_SIZE) 
+    
+    print("Connected to address:", address)
+    
+    try:
+        while True:
+            result = instance.read();
+            if result.is_valid():
+                print("Last Valid Input: " + str(datetime.datetime.now()))
+                print("Server sent data!!")
+                conn.send(0)
+                time.sleep(6)
         
+    except KeyboardInterrupt:
+        print("Failed. Cleaning GPIO")
+        GPIO.cleanup()
+        
+    conn.close()
+    sock.close()

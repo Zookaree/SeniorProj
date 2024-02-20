@@ -7,6 +7,9 @@
 
 int main(int argc, char * argv[])
 {
+	int server;
+	char send_msg[256] = "Sending to server";
+	char response[256];
 	//create a socket 
 	int sockfd;
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -16,29 +19,29 @@ int main(int argc, char * argv[])
 	memset((char *)&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(0); //requests a port
+	addr.sin_port = htons(UDP_PORT); //requests a port
 	
-	bind(sockfd, (struct sockaddr *)&addr, sizeof(addr));
+	int conn = connect(server, (struct sockaddr*) &addr,
+	 sizeof(addr));
+	if(conn == -1)
+	{ printf("Error with Connection"); return -1; }
 	
-	//get server address
-	struct addrinfo hints;
-	struct addrinfo * addr_info;
-	struct sockaddr_in server_addr;
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_INET;
 	
-	if(getaddrinfo(UDP_IP, NULL, &hints, &addr_info) != 0)
+	/*if (toServer == -1) 
 		perror("Error getting adress info");
 		
-	memcpy(&server_addr, addr_info->ai_addr, addr_info->ai_addrlen);
+	memcpy(&server_addr, addr_info->ai_addr, 
+	addr_info->ai_addrlen);
 	server_addr.sin_port = htons(UDP_PORT);
 	
-	freeaddrinfo(addr_info);
+	freeaddrinfo(addr_info);*/
 	
 	//[INSERT COMMANDS TO BE SENT/RECEIVED HERE]
 	while(1)
 	{
-		
+		send(server, send_msg, sizeof(send_msg), 0);
+		recv(server, server_response, sizeof(response),0);
+		printf("%s", response);
 	}
 	
 	close(sockfd)

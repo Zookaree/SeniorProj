@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import RPi.GPIO as GPIO
 import socket
 import sys
@@ -15,7 +17,7 @@ UDP_PORT = 2345
 BUFF_SIZE = 1024
 
 if __name__ == '__main__':
-    if len(sys.argv) == 1:
+    if len(sys.argv) == 2:
         UDP_PORT = int(sys.argv[1])
         
     print ("UDP target IP:", UDP_IP)
@@ -25,9 +27,11 @@ if __name__ == '__main__':
     sock.bind((UDP_IP, UDP_PORT))
     
     #get data from client, addr is who sent it (i.e. rpi client)
-    sock.listen(9)
-    conn, address = sock.accept()
-    #data, addr = sock.recvfrom(BUFF_SIZE) 
+    #FOR UDP CONNECTIONS, LISTEN AND ACCEPT DO NOT NEED TO HAPPEN
+    #BECASUSE UDP YOU DONT NEED TO VERIFY A CONNECTIONS
+    #sock.listen()
+    #conn, address = sock.accept()
+    data, addr = sock.recvfrom(BUFF_SIZE) 
     
     print("Connected to address:", address)
     

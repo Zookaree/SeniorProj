@@ -15,6 +15,10 @@ global UDP_PORT
 UDP_PORT = 2345
 BUFF_SIZE = 1024
 
+def send_response(response, scok, destination) :
+    msg = bytes(response, 'utf-8')
+    sock.sendto(msg, destination);
+
 def proc_request(cmd, sock, requester) : 
     #convert the cmd to a string
     cmd = bytes.decode(cmd, 'utf-8')
@@ -24,6 +28,12 @@ def proc_request(cmd, sock, requester) :
     if cmd[0] == "test":
         print("This is a test print to let you\
         know that the server was established")
+        send_response(words, sock, requester)
+    elif cmd[0] == "run":
+        print("WALL-C Activated")
+        send_response(active, sock, requester)
+    else
+        send_response("Command Not Sent", sock, requester)
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
@@ -39,14 +49,6 @@ if __name__ == '__main__':
     #FOR UDP CONNECTIONS, LISTEN AND ACCEPT DO NOT NEED TO HAPPEN
     #BECASUSE UDP YOU DONT NEED TO VERIFY A CONNECTIONS
     
-    try:
-        while True:
-            data, addr = sock.recvfrom(BUFF_SIZE) 
-            proc_request(data, sock, addr)
-        
-    except KeyboardInterrupt:
-        print("Failed. Cleaning GPIO")
-        GPIO.cleanup()
-        
-    conn.close()
-    sock.close()
+    while True:
+        data, addr = sock.recvfrom(BUFF_SIZE) 
+        proc_request(data, sock, addr)

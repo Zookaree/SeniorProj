@@ -1,15 +1,103 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
 
 #define UDP_IP "127.0.0.1"
 #define UDP_PORT 2345
 
+void process_commands(int sock, struct sockaddr_in *server_addr)
+{
+	char cmd[200];
+	char response[4096];
+	int status = 0;
+	int recv_len = 0;
+	int last = 0;
+	char *token = 0;
+	printf("cmd> ");
+	
+	while (fgets(cmd, sizeof(cmd), stdin) != NULL)
+	{
+		//trimming trailing newline
+		last = strlen(cmd) - 1;
+		if (cmd[last] == '\n')
+			cmd[last] = 0;
+		strcpy(copy, cmd);
+		token = strtok(cmd, " ");
+		if (strcmp(cmd, "exit") == 0)
+			break;
+		else if (strcmp(cmd, "test") == 0)
+		{
+			printf("Printing 'test' statement: ");
+			status = sendto(sock, cmd, strlen(cmd), 0,
+				(struct sockaddr *)server_addr, sizeof(*server_addr));
+			if (status < 0)
+			{
+				perror("send to server failed");
+				exit(1);
+			}
+			
+			recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
+			
+			if (recv_len < 0)
+			{
+				perror("recv from server failed");
+				exit(1);
+			}
+			
+			//null terminate the string
+			response[recv_len] = 0;
+			printf("%s\n", response);
+			//token = strtok_r(response, "\n", &token);
+			//while (token != NULL)
+			//{
+				//printf("%s", token);
+				//token = strtok_r(NULL, "#", &token);
+			//}
+			
+		}
+		else if (strcmp(cmd, "run") == 0)
+		{
+			printf("Printing 'run' statement: ");
+			status = sendto(sock, cmd, strlen(cmd), 0,
+				(struct sockaddr *)server_addr, sizeof(*server_addr));
+			if (status < 0)
+			{
+				perror("send to server failed");
+				exit(1);
+			}
+			
+			recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
+			
+			if (recv_len < 0)
+			{
+				perror("recv from server failed");
+				exit(1);
+			}
+			
+			//null terminate the string
+			response[recv_len] = 0;
+			printf("%s\n", response);
+		}
+		else
+		{
+			perror("Invalid Command");
+			exit(1);
+		}
+		printf("cmd> ");
+	}
+}
+
 int main(int argc, char * argv[])
 {
-	int server;
-	char send_msg[256] = "Sending to server";
-	char response[256];
+
 	//create a socket 
 	int sockfd;
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -21,30 +109,27 @@ int main(int argc, char * argv[])
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
 	addr.sin_port = htons(UDP_PORT); //requests a port
 	
-	int conn = connect(server, (struct sockaddr*) &addr,
-	 sizeof(addr));
-	if(conn == -1)
-	{ printf("Error with Connection"); return -1; }
+	bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myadr));
 	
+	// get the server's address
+	struct addrinfo hints;
+	struct addrinfo *addr;
 	
-	/*if (toServer == -1) 
-		perror("Error getting adress info");
+	struct sockaddr_in server_addr;
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+	
+	if (getaddrinfo(UDP_IP, NULL, &hints, &addr) != 0)
+		perror("Error getting address info:");
 		
-	memcpy(&server_addr, addr_info->ai_addr, 
-	addr_info->ai_addrlen);
-	server_addr.sin_port = htons(UDP_PORT);
+	memcpy(&server_addr, addr->aiai_addr, addr->ai_addrlen);
+	server_addr.sin_port = htons(UDD_PORT);
 	
-	freeaddrinfo(addr_info);*/
+	freeaddrinfo(addr);
 	
-	//[INSERT COMMANDS TO BE SENT/RECEIVED HERE]
-	while(1)
-	{
-		send(server, send_msg, sizeof(send_msg), 0);
-		recv(server, server_response, sizeof(response),0);
-		printf("%s", response);
-	}
+	process_commands(sockfd, &server_addr);
 	
-	close(sockfd)
+	close(sockfd);
 	
 	return 0;
 }

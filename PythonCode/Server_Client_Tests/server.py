@@ -45,10 +45,6 @@ if __name__ == '__main__':
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Internet UDP
     sock.bind((UDP_IP, UDP_PORT))
     
-    #get data from client, addr is who sent it (i.e. rpi client)
-    #FOR UDP CONNECTIONS, LISTEN AND ACCEPT DO NOT NEED TO HAPPEN
-    #BECASUSE UDP YOU DONT NEED TO VERIFY A CONNECTIONS
-    
     while True:
         data, addr = sock.recvfrom(BUFF_SIZE) 
         proc_request(data, sock, addr)

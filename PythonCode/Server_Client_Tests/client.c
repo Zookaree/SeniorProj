@@ -21,6 +21,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 	int recv_len = 0;
 	int last = 0;
 	char *token = 0;
+	char copy[200];
 	printf("cmd> ");
 	
 	while (fgets(cmd, sizeof(cmd), stdin) != NULL)
@@ -103,13 +104,13 @@ int main(int argc, char * argv[])
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
 	
 	//bind to any addr
-	struct sockadder_in addr;
-	memset((char *)&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(UDP_PORT); //requests a port
+	struct sockaddr_in myaddr;
+	memset((char *)&myaddr, 0, sizeof(myaddr));
+	myaddr.sin_family = AF_INET;
+	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	myaddr.sin_port = htons(UDP_PORT); //requests a port
 	
-	bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myadr));
+	bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr));
 	
 	// get the server's address
 	struct addrinfo hints;
@@ -122,8 +123,8 @@ int main(int argc, char * argv[])
 	if (getaddrinfo(UDP_IP, NULL, &hints, &addr) != 0)
 		perror("Error getting address info:");
 		
-	memcpy(&server_addr, addr->aiai_addr, addr->ai_addrlen);
-	server_addr.sin_port = htons(UDD_PORT);
+	memcpy(&server_addr, addr->ai_addr, addr->ai_addrlen);
+	server_addr.sin_port = htons(UDP_PORT);
 	
 	freeaddrinfo(addr);
 	

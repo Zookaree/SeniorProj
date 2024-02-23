@@ -15,35 +15,6 @@ import os
 import time
 import socket
 import re
-
-def clientFunc():
-  s = socket.socket()  # Create a socket object
-  port = 8080  # Reserve a port for your service every new transfer wants a new port or you must wait.
-
-  s.connect(('localhost', port))
-  x = 0
-
-  st = str(x)
-  byt = st.encode()
-  s.send(byt)
-
-  # send message for hundred times
-  while x < 100:
-    st = str(x)
-    byt = st.encode()
-    s.send(byt)
-    print(x)
-
-    data = s.recv(1024)
-    if data:
-      print(data)
-      x += 1
-      break
-    else:
-      print('no data received')
-
-  print('closing')
-  s.close()
   
 def distanceData():
   distance = board.getDistance()

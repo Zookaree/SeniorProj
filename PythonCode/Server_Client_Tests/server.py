@@ -26,13 +26,14 @@ def proc_request(cmd, sock, requester) :
     print(now, "Processing: " + cmd)
     cmd = cmd.split()
     if cmd[0] == "test":
-        print("This is a test print to let you\
-        know that the server was established")
-        send_response(words, sock, requester)
+        print("This is a test print to let you know that the server was established")
+        send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
         print("WALL-C Activated")
-        send_response(active, sock, requester)
-    else
+        send_response("Active Sent", sock, requester)
+    elif cmd[0] == "exit":
+        send_response("Server Exited", sock, requester)
+    else:
         send_response("Command Not Sent", sock, requester)
 
 if __name__ == '__main__':

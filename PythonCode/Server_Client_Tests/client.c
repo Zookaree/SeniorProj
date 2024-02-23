@@ -56,12 +56,6 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 			//null terminate the string
 			response[recv_len] = 0;
 			printf("%s\n", response);
-			//token = strtok_r(response, "\n", &token);
-			//while (token != NULL)
-			//{
-				//printf("%s", token);
-				//token = strtok_r(NULL, "#", &token);
-			//}
 			
 		}
 		else if (strcmp(cmd, "run") == 0)

@@ -6,16 +6,24 @@ import datetime
 import time
 import os
 import re
+import pickle
 #Need to import Temperature Sensor and Distance Sensor Data eventually
 #Probably Motor as well if possible
 #Will also need to incoroporate some other libraries to consider
 #other items such as joystick, etc.
 
-
 UDP_IP = '127.0.0.1'
 global UDP_PORT
 UDP_PORT = 2345
 BUFF_SIZE = 1024
+
+from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
+from w1thermsensor import W1ThermSensor
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+sensor = W1ThermSensor()
+board = Board()
 
 def distanceData():
   distance = board.getDistance()
@@ -57,19 +65,12 @@ def proc_request(cmd, sock, requester) :
         send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
         print("WALL-C Activated")
-        send_response("Active Sent", sock, requester)
+        send_response(distanceData(), sock, requester)
+        send_response(temperatureData(), sock, requester)
     elif cmd[0] == "exit":
         send_response("Server Exited", sock, requester)
     else:
         send_response("Command Not Sent", sock, requester)
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-
-from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
-from w1thermsensor import W1ThermSensor
-
-sensor = W1ThermSensor()
-board = Board()
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:

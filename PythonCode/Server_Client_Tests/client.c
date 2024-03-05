@@ -60,26 +60,29 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 		}
 		else if (strcmp(cmd, "run") == 0)
 		{
-			printf("Printing 'run' statement: ");
-			status = sendto(sock, cmd, strlen(cmd), 0,
-				(struct sockaddr *)server_addr, sizeof(*server_addr));
-			if (status < 0)
+			while (1)
 			{
-				perror("send to server failed");
-				exit(1);
+				printf("Printing 'run' statement: ");
+				status = sendto(sock, cmd, strlen(cmd), 0,
+					(struct sockaddr *)server_addr, sizeof(*server_addr));
+				if (status < 0)
+				{
+					perror("send to server failed");
+					exit(1);
+				}
+				
+				recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
+				
+				if (recv_len < 0)
+				{
+					perror("recv from server failed");
+					exit(1);
+				}
+				
+				//null terminate the string
+				response[recv_len] = 0;
+				printf("%s\n", response);
 			}
-			
-			recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
-			
-			if (recv_len < 0)
-			{
-				perror("recv from server failed");
-				exit(1);
-			}
-			
-			//null terminate the string
-			response[recv_len] = 0;
-			printf("%s\n", response);
 		}
 		else
 		{

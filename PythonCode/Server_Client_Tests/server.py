@@ -68,10 +68,11 @@ def proc_request(cmd, sock, requester) :
         print("This is a test print to let you know that the server was established")
         send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
-        print("WALL-C Activated")
-        #sensorDistance = {'distance' : distanceData()}
-        sock.sendto(json.dumps(distanceData()).encode('utf-8'), requester)
-        sock.sendto(json.dumps(temperatureData()).encode('utf-8'), requester)
+        while True:
+            print("WALL-C Activated")
+            #sensorDistance = {'distance' : distanceData()}
+            sock.sendto(json.dumps(distanceData()).encode('utf-8'), requester)
+            sock.sendto(json.dumps(temperatureData()).encode('utf-8'), requester)
     elif cmd[0] == "exit":
         send_response("Server Exited", sock, requester)
     else:

@@ -19,14 +19,6 @@ global UDP_PORT
 UDP_PORT = 2345
 BUFF_SIZE = 1024
 
-from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
-from w1thermsensor import W1ThermSensor
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
-
-sensor = W1ThermSensor()
-board = Board()
-
 def distanceData():
   distance = board.getDistance()
   print_distance(distance)
@@ -81,6 +73,14 @@ def proc_request(cmd, sock, requester) :
         #sock.sendto(json.dumps(distanceData()).encode('utf-8'), (UDP_IP, UDP_PORT))
         #sock.sendto(json.dumps(sensorTemp).encode('utf-8'), requester)
 
+from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
+from w1thermsensor import W1ThermSensor
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+
+sensor = W1ThermSensor()
+board = Board()
+        
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         UDP_PORT = int(sys.argv[1])

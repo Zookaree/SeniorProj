@@ -8,6 +8,7 @@ import os
 import re
 import pickle
 import json
+import RPi.GPIO as GPIO
 
 #Need to import Temperature Sensor and Distance Sensor Data eventually
 #Probably Motor as well if possible

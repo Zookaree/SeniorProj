@@ -25,6 +25,10 @@ def distanceData():
   print_distance(distance)
   #Delay time < 0.6s
   time.sleep(0.3)
+  
+def set_throttle(throttle_us):
+    cycle = throttle_us / 20000.0 * 100
+    pwm.ChangeDutyCycle(cycle)
     
 def temperatureData():
   temperature = sensor.get_temperature()
@@ -66,13 +70,11 @@ def proc_request(cmd, sock, requester) :
             #sensorDistance = {'distance' : distanceData()}
             sock.sendto(json.dumps(distanceData()).encode('utf-8'), requester)
             sock.sendto(json.dumps(temperatureData()).encode('utf-8'), requester)
+            sock.sendto(json.dumps(set_throttle()).encode('utf-8'), requester)
     elif cmd[0] == "exit":
         send_response("Server Exited", sock, requester)
     else:
         send_response("Data Not Sent", sock, requester)
-        #sensorTemp = {'temperature' : temperatureData()}
-        #sock.sendto(json.dumps(distanceData()).encode('utf-8'), (UDP_IP, UDP_PORT))
-        #sock.sendto(json.dumps(sensorTemp).encode('utf-8'), requester)
 
 from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board
 from w1thermsensor import W1ThermSensor
@@ -92,6 +94,17 @@ if __name__ == '__main__':
     dis_min = 0;
     dis_max = 4500;
     
+    ESC_GPIO_PIN = 12
+
+    ESC_PWM_FREQUENCY = 1500
+
+    ESC_THROTTLE_REVERSE = 1100
+    ESC_THROTTLE_FORWARD = 1900
+
+    GPIO.setup(ESC_GPIO_PIN, GPIO.OUT)
+    pwm = GPIO.PWM(ESC_GPIO_PIN, ESC_PWM_FREQUENCY)
+    pwm.start(50)
+    
     board.set_dis_range(dis_min, dis_max)
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Internet UDP
@@ -100,3 +113,6 @@ if __name__ == '__main__':
     while True:
         data, addr = sock.recvfrom(BUFF_SIZE) 
         proc_request(data, sock, addr)
+        
+    pwm.stop()
+    GPIO.cleanup()

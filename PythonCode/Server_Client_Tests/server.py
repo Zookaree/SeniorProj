@@ -20,21 +20,41 @@ global UDP_PORT
 UDP_PORT = 2345
 BUFF_SIZE = 1024
 
+#Function - distanceData()
+#Function returns data taken from the 
+#A02 distance sensor
+#Parameters - None
 def distanceData():
   distance = board.getDistance()
   print_distance(distance)
   #Delay time < 0.6s
   time.sleep(0.3)
   
+#Function - set_throttle()
+#Function declares the PWM signal sent
+#to the T200 BlueRobotics Thruster where
+#1100us is the maximum for reversal and
+#1900us is the maximum for forward
+#Parameters - throttle_us (a variable that 
+#is the placeholder for PWM value being send to motor
 def set_throttle(throttle_us):
     cycle = throttle_us / 20000.0 * 100
     pwm.ChangeDutyCycle(cycle)
     
+#Function - temperatureData()
+#Function returns the temperature data received
+#from the DS18 temperature sensor
+#Parameters - None
 def temperatureData():
   temperature = sensor.get_temperature()
   print("The temp is %s celcius" % temperature)
   time.sleep(0.3)
-
+  
+#Function - print_distance()
+#Function is a helper function to the A02
+#distance sensor that prints distance and 
+#various other help tasks
+#Parameters - None
 def print_distance(dis):
   if board.last_operate_status == board.STA_OK:
     print("Distance %d mm" %dis)
@@ -48,11 +68,26 @@ def print_distance(dis):
     print("Below the lower limit: %d" %dis)
   elif board.last_operate_status == board.STA_ERR_DATA:
     print("No data!")
-
+    
+#Function - send_response()
+#Function is a helper function to the server
+#implementation of the server-client socket connection
+#where it will send the reponse and data of the data 
+#to the client
+#Parameters - None
 def send_response(response, sock, destination) :
     msg = bytes(response, 'utf-8')
     sock.sendto(msg, destination);
 
+#Function - proc_request()
+#Function is the bulk of the server code where it will
+#process the requests sent by the client where the three
+#commands are 'test', 'run', and 'exit'. 'run' mode is 
+#the command that handles the full functionallity of WALL-C's
+#movement and sensor data acquisition
+#Parameters - cmd (a string received from the client), sock
+#(the socket that is being communicated with), requester (the
+#client that is requesting the data being sent to it)
 def proc_request(cmd, sock, requester) : 
     #convert the cmd to a string
     #sensorData = sock
@@ -62,18 +97,24 @@ def proc_request(cmd, sock, requester) :
     print(now, "Processing: " + cmd)
     cmd = cmd.split()
     if cmd[0] == "test":
+        #self explanatory duh
         print("This is a test print to let you know that the server was established")
         send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
         while True:
             print("WALL-C Activated")
-            #sensorDistance = {'distance' : distanceData()}
+            #Distance Data being sent via JSON
             sock.sendto(json.dumps(distanceData()).encode('utf-8'), requester)
+            #Temperature Data being sent via JSON
             sock.sendto(json.dumps(temperatureData()).encode('utf-8'), requester)
+            #Motor PWM signal being sent back from the client (might
+            #want to just receive the data and not send it back just saying)
             sock.sendto(json.dumps(set_throttle()).encode('utf-8'), requester)
     elif cmd[0] == "exit":
+        #this command exits the server-client socket
         send_response("Server Exited", sock, requester)
     else:
+        #This is just a catch all, should never get here unless intentional
         send_response("Data Not Sent", sock, requester)
 
 from DFRobot_RaspberryPi_A02YYUW import DFRobot_A02_Distance as Board

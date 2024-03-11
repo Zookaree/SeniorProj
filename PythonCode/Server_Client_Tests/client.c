@@ -15,8 +15,8 @@
 
 #define JOYSTICK_PIN_X 17 	//GPIO 17
 #define MOTOR_PWM_PIN 12 	//GPIO 12
-#define PWM_MIN 1100		//Reversal Motor Val
-#define PWM_MAX 1900		//Forward Motor Val
+#define PWM_MIN 1100		//Full Reversal Motor Val
+#define PWM_MAX 1900		//Full Forward Motor Val
 #define NEUTRAL_PWM 1500	//Neutral Motor Val
 
 int checkVal = 0;
@@ -32,13 +32,13 @@ int map(int x, int in_min, int in_max, int out_min, int out_max)
 
 void process_commands(int sock, struct sockaddr_in *server_addr)
 {
-	char cmd[200];
-	char response[4096];
-	int status = 0;
-	int recv_len = 0;
-	int last = 0;
-	char *token = 0;
-	char copy[200];
+	char cmd[200]; 		//Command array
+	char response[4096];//Response array 
+	int status = 0;		
+	int recv_len = 0;	
+	int last = 0;	
+	char *token = 0;	
+	char copy[200];		//Copy of Command Array
 	printf("cmd> ");
 	
 	while (fgets(cmd, sizeof(cmd), stdin) != NULL)
@@ -54,16 +54,16 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 		else if (strcmp(cmd, "test") == 0)
 		{
 			printf("Printing 'test' statement: ");
-			status = sendto(sock, cmd, strlen(cmd), 0,
+			status = sendto(sock, cmd, strlen(cmd), 0, //Checks the value of status
 				(struct sockaddr *)server_addr, sizeof(*server_addr));
-			if (status < 0)
+			if (status < 0) //If status is less than one then we've failed the status check
 			{
 				perror("send to server failed");
 				exit(1);
 			}
-			
+			//This will receive the length of the command from the server talking back to the client
 			recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
-			
+			//if the length was less than 0, then we have a problem
 			if (recv_len < 0)
 			{
 				perror("recv from server failed");
@@ -75,7 +75,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 			printf("%s\n", response);
 			
 		}
-		else if (strcmp(cmd, "run") == 0)
+		else if (strcmp(cmd, "run") == 0) //This is our Run Command for WALL-C
 		{
 			while (1)
 			{
@@ -95,17 +95,17 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 					perror("recv from server failed");
 					exit(1);
 				}
-				
+				//Joystick Code using WiringPi
 				int joystickVal = digitalRead(JOYSTICK_PIN_X);
 				if (joystickVal == 1)
 				{
-					pwmVal = map(joystickVal, 0, 1023, 1500, PWM_MAX);
-					checkVal = -1;
+					pwmVal = map(joystickVal, 0, 1023, NEUTRAL_PWM, PWM_MAX);
+					checkVal = -1; //My personal statuscheck for neutral vs forward moving
 				}
-				else if (joystickVal == 0 && checkVal == -1)
+				else if (joystickVal == 0 && checkVal == -1) //Moves slightly forward
 					pwmVal = map(joystickVal, 0, 1023, 1600, PWM_MAX);
 
-				pwmWrite(MOTOR_PWM_PIN, pwmVal);
+				pwmWrite(MOTOR_PWM_PIN, pwmVal); //PWMWrite is Arduino taken implemented into C
 				
 				printf("Joystick X-axis val: %d, PWM Val: %d\n", joystickVal, pwmVal);
 				
@@ -162,6 +162,8 @@ int main(int argc, char * argv[])
 		return -1;
 	}
 	
+	//Arduino esque things used from WiringPi that sends the mode
+	//of the pins assigned (17 and 12 respectively)
 	pinMode(JOYSTICK_PIN_X, INPUT);
 	pinMode(MOTOR_PWM_PIN, PWM_OUTPUT);
 	

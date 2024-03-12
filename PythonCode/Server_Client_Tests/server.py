@@ -9,6 +9,7 @@ import re
 import pickle
 import json
 import RPi.GPIO as GPIO
+import pigpio
 
 #Need to import Temperature Sensor and Distance Sensor Data eventually
 #Probably Motor as well if possible
@@ -19,6 +20,9 @@ UDP_IP = '127.0.0.1'
 global UDP_PORT
 UDP_PORT = 2345
 BUFF_SIZE = 1024
+ESC_GPIO_PIN = 12
+ESC_PWM_FREQUENCY = 50
+NEUTRAL_THROTTLE = 1500
 
 #Function - distanceData()
 #Function returns data taken from the 
@@ -38,8 +42,7 @@ def distanceData():
 #Parameters - throttle_us (a variable that 
 #is the placeholder for PWM value being send to motor
 def set_throttle(throttle_us):
-    cycle = throttle_us / 20000.0 * 100
-    pwm.ChangeDutyCycle(cycle)
+    pi.set_servo_pulsewidth(ESC_GPIO_PIN, throttle_us)
     
 #Function - temperatureData()
 #Function returns the temperature data received
@@ -102,6 +105,7 @@ def proc_request(cmd, sock, requester) :
         send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
         print("WALL-C Activated")
+        print("we made it here")
         while True:
             
             #Distance Data being sent via JSON
@@ -111,13 +115,11 @@ def proc_request(cmd, sock, requester) :
             #Motor PWM signal being sent back from the client (might
             #want to just receive the data and not send it back just saying)
             receivedBytes = sock.recvfrom(4)
-            #print(receivedBytes[0].decode())
-            if receivedBytes[0].decode() == "run":
-                pass
-            else:
-                tempThrottleVal = float(receivedBytes[0].decode())#.strip('\x00'))
-                print(tempThrottleVal)
-                set_throttle(tempThrottleVal)
+            tempThrottleVal = int(receivedBytes[0].decode())#.strip('\x00'))
+            print(tempThrottleVal)
+            set_throttle(tempThrottleVal)
+            print("we set throttle again?")
+            #set_throttle(int(receivedBytes[0].decode()))
     elif cmd[0] == "exit":
         #this command exits the server-client socket
         send_response("Server Exited", sock, requester)
@@ -140,29 +142,26 @@ if __name__ == '__main__':
     print ("UDP target IP:", UDP_IP)
     print ("UDP targer Port:", UDP_PORT)
     GPIO.setmode(GPIO.BOARD)
+    pi = pigpio.pi()
+    pi.set_PWM_frequency(ESC_GPIO_PIN, ESC_PWM_FREQUENCY)
+    set_throttle(NEUTRAL_THROTTLE)
     
     dis_min = 0;
     dis_max = 4500;
-    
-    ESC_GPIO_PIN = 12
-
-    ESC_PWM_FREQUENCY = 1500
-
-    ESC_THROTTLE_REVERSE = 1100
-    ESC_THROTTLE_FORWARD = 1900
-
-    GPIO.setup(ESC_GPIO_PIN, GPIO.OUT)
-    pwm = GPIO.PWM(ESC_GPIO_PIN, ESC_PWM_FREQUENCY)
-    pwm.start(50)
     
     board.set_dis_range(dis_min, dis_max)
     
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #Internet UDP
     sock.bind((UDP_IP, UDP_PORT))
     
-    while True:
-        data, addr = sock.recvfrom(BUFF_SIZE) 
+    try:
+        data, addr = sock.recvfrom(BUFF_SIZE)
         proc_request(data, sock, addr)
+
+    except KeyboardInterrupt:
+        pass
         
-    pwm.stop()
-    GPIO.cleanup()
+    finally:
+        pi.set_servo_pulsewidth(ESC_GPIO_PIN, 0)
+        pi.stop()
+        

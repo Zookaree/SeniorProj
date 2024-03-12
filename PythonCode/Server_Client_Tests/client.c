@@ -91,7 +91,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				}
 			while (1)
 			{
-				printf("Printing 'run' statement: ");
+				//printf("Printing 'run' statement: ");
 				
 				recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
 				
@@ -105,11 +105,11 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				if (joystickVal == 1)
 				{
 					if (loopVal > 1500)
-						loopVal -= 1;
+						loopVal -= 25;
 					checkVal = -1;
 				}
 				else if (joystickVal == 0 && checkVal == -1)
-					loopVal += 1;
+					loopVal += 25;
 				
 				pwmVal = map(joystickVal, 0, 1023, loopVal, PWM_MAX);
 				

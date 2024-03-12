@@ -21,6 +21,7 @@
 
 int checkVal = 0;
 int pwmVal = 0;
+int loopVal = 1500;
 
 //Substitute map function from Arduino's map
 //Allows in_min to be out_min and in_max to be out_max and in
@@ -35,8 +36,11 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 	char cmd[200]; 		//Command array
 	char response[4096];//Response array 
 	int status = 0;		
-	int recv_len = 0;	
-	int last = 0;	
+	int recv_len = 0;
+	int send_len = 0;
+	int slen = sizeof(server_addr);
+	int last = 0;
+	int* pwmPointer = 0;
 	char *token = 0;	
 	char copy[200];		//Copy of Command Array
 	printf("cmd> ");
@@ -99,12 +103,15 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				int joystickVal = digitalRead(JOYSTICK_PIN_X);
 				if (joystickVal == 1)
 				{
-					pwmVal = map(joystickVal, 0, 1023, NEUTRAL_PWM, PWM_MAX);
-					checkVal = -1; //My personal statuscheck for neutral vs forward moving
+					if (loopVal > 1500)
+						loopVal -= 1;
+					checkVal = -1;
 				}
-				else if (joystickVal == 0 && checkVal == -1) //Moves slightly forward
-					pwmVal = map(joystickVal, 0, 1023, 1600, PWM_MAX);
-
+				else if (joystickVal == 0 && checkVal == -1)
+					loopVal += 1;
+				
+				pwmVal = map(joystickVal, 0, 1023, loopVal, PWM_MAX);
+				
 				pwmWrite(MOTOR_PWM_PIN, pwmVal); //PWMWrite is Arduino taken implemented into C
 				
 				printf("Joystick X-axis val: %d, PWM Val: %d\n", joystickVal, pwmVal);
@@ -112,6 +119,18 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				//null terminate the string
 				response[recv_len] = 0;
 				printf("%s\n", response);
+				
+				pwmPointer = (void*)pwmVal;
+				
+				send_len = sendto(sock, (void*)pwmPointer, sizeof(pwmVal), 0, NULL, slen);
+				
+				if (send_len < 0)
+				{
+					perror("sendto from client failed");
+					exit(1);
+				}
+				
+				printf("%x\n", pwmVal);
 			}
 		}
 		else

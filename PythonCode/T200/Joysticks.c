@@ -30,18 +30,22 @@ int main(void)
 	
 	int checkVal = 0;
 	int pwmVal = 0;
+	int loopVal = 1500;
 	
 	while(1)
 	{
 		int joystickVal = digitalRead(JOYSTICK_PIN_X);
 		if (joystickVal == 1)
 		{
-			pwmVal = map(joystickVal, 0, 1023, 1500, PWM_MAX);
+			if (loopVal > 1500)
+				loopVal -= 1;
 			checkVal = -1;
 		}
 		else if (joystickVal == 0 && checkVal == -1)
-			pwmVal = map(joystickVal, 0, 1023, 1600, PWM_MAX);
+			loopVal += 1;
 
+		pwmVal = map(joystickVal, 0, 1023, loopVal, PWM_MAX);
+		
 		pwmWrite(MOTOR_PWM_PIN, pwmVal);
 		
 		printf("Joystick X-axis val: %d, PWM Val: %d\n", joystickVal, pwmVal);

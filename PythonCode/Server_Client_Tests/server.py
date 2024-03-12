@@ -101,15 +101,23 @@ def proc_request(cmd, sock, requester) :
         print("This is a test print to let you know that the server was established")
         send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
+        print("WALL-C Activated")
         while True:
-            print("WALL-C Activated")
+            
             #Distance Data being sent via JSON
             sock.sendto(json.dumps(distanceData()).encode('utf-8'), requester)
             #Temperature Data being sent via JSON
             sock.sendto(json.dumps(temperatureData()).encode('utf-8'), requester)
             #Motor PWM signal being sent back from the client (might
             #want to just receive the data and not send it back just saying)
-            sock.sendto(json.dumps(set_throttle()).encode('utf-8'), requester)
+            receivedBytes = sock.recvfrom(4)
+            #print(receivedBytes[0].decode())
+            if receivedBytes[0].decode() == "run":
+                pass
+            else:
+                tempThrottleVal = float(receivedBytes[0].decode())#.strip('\x00'))
+                print(tempThrottleVal)
+                set_throttle(tempThrottleVal)
     elif cmd[0] == "exit":
         #this command exits the server-client socket
         send_response("Server Exited", sock, requester)
@@ -131,6 +139,7 @@ if __name__ == '__main__':
         
     print ("UDP target IP:", UDP_IP)
     print ("UDP targer Port:", UDP_PORT)
+    GPIO.setmode(GPIO.BOARD)
     
     dis_min = 0;
     dis_max = 4500;

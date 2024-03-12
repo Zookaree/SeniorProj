@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <wiringPi.h> 
+#include <arpa/inet.h>
 
 #define UDP_IP "127.0.0.1"
 #define UDP_PORT 2345
@@ -40,9 +41,9 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 	int send_len = 0;
 	int slen = sizeof(server_addr);
 	int last = 0;
-	int* pwmPointer = 0;
 	char *token = 0;	
 	char copy[200];		//Copy of Command Array
+	char joystickStr[64];
 	printf("cmd> ");
 	
 	while (fgets(cmd, sizeof(cmd), stdin) != NULL)
@@ -81,16 +82,16 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 		}
 		else if (strcmp(cmd, "run") == 0) //This is our Run Command for WALL-C
 		{
-			while (1)
-			{
-				printf("Printing 'run' statement: ");
-				status = sendto(sock, cmd, strlen(cmd), 0,
+			status = sendto(sock, cmd, strlen(cmd), 0,
 					(struct sockaddr *)server_addr, sizeof(*server_addr));
 				if (status < 0)
 				{
 					perror("send to server failed");
 					exit(1);
 				}
+			while (1)
+			{
+				printf("Printing 'run' statement: ");
 				
 				recv_len = recvfrom(sock, response, sizeof(response), 0, NULL, NULL);
 				
@@ -112,25 +113,23 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				
 				pwmVal = map(joystickVal, 0, 1023, loopVal, PWM_MAX);
 				
-				pwmWrite(MOTOR_PWM_PIN, pwmVal); //PWMWrite is Arduino taken implemented into C
+				//pwmWrite(MOTOR_PWM_PIN, pwmVal); //PWMWrite is Arduino taken implemented into C
 				
 				printf("Joystick X-axis val: %d, PWM Val: %d\n", joystickVal, pwmVal);
 				
 				//null terminate the string
 				response[recv_len] = 0;
-				printf("%s\n", response);
+				//printf("%s\n", response);
 				
-				pwmPointer = (void*)pwmVal;
+				sprintf(joystickStr, "%d", pwmVal);
+				int sendVar = sendto(sock, joystickStr, sizeof(joystickStr), 
+				0, (struct sockaddr*)server_addr, sizeof(*server_addr));
 				
-				send_len = sendto(sock, (void*)pwmPointer, sizeof(pwmVal), 0, NULL, slen);
-				
-				if (send_len < 0)
+				if(sendVar < 0)
 				{
-					perror("sendto from client failed");
+					perror("PWMVal sent has failed\n");
 					exit(1);
 				}
-				
-				printf("%x\n", pwmVal);
 			}
 		}
 		else
@@ -154,6 +153,11 @@ int main(int argc, char * argv[])
 	memset((char *)&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	//if(inet_pton(AF_INET, UDP_IP, &myaddr.sin_addr) <= 0)
+	//{
+		//perror("Inet_pton");
+		//exit(1);
+	//}
 	myaddr.sin_port = htons(UDP_PORT); //requests a port
 	
 	bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr));

@@ -11,7 +11,7 @@
 #include <wiringPi.h> 
 #include <arpa/inet.h>
 
-#define UDP_IP "127.0.0.1"
+#define UDP_IP "192.168.1.10"
 #define UDP_PORT 2345
 
 #define JOYSTICK_PIN_X 17 	//GPIO 17

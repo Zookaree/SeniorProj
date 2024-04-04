@@ -8,17 +8,24 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <wiringPi.h> 
+//#include <wiringPi.h> 
 #include <arpa/inet.h>
+#include <pigpio.h>
+#include <signal.h>
 
-#define UDP_IP "192.168.1.10"
-#define UDP_PORT 2345
+#define UDP_IP "127.0.0.1"//"192.168.1.10"
+#define UDP_PORT 9931
 
 #define JOYSTICK_PIN_X 17 	//GPIO 17
 #define MOTOR_PWM_PIN 12 	//GPIO 12
 #define PWM_MIN 1100		//Full Reversal Motor Val
 #define PWM_MAX 1900		//Full Forward Motor Val
 #define NEUTRAL_PWM 1500	//Neutral Motor Val
+
+//PHY pin 29, 31, 37
+#define LED0_GPIO 5;
+#define LED1_GPIO 6;
+#define LED2_GPIO 26;
 
 int checkVal = 0;
 int pwmVal = 0;
@@ -41,6 +48,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 	int send_len = 0;
 	int slen = sizeof(server_addr);
 	int last = 0;
+	int gpioResult = 0;
 	char *token = 0;	
 	char copy[200];		//Copy of Command Array
 	char joystickStr[64];
@@ -84,11 +92,18 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 		{
 			status = sendto(sock, cmd, strlen(cmd), 0,
 					(struct sockaddr *)server_addr, sizeof(*server_addr));
-				if (status < 0)
-				{
-					perror("send to server failed");
-					exit(1);
-				}
+			if (status < 0)
+			{
+				perror("send to server failed");
+				exit(1);
+			}
+			gpioResult = gpioInitialise();
+			if (gpioResult == PI_INIT_FAILED)
+			{
+				perror("gpioInitialise failed");
+				exit(1);
+			}
+			
 			while (1)
 			{
 				//printf("Printing 'run' statement: ");
@@ -179,16 +194,18 @@ int main(int argc, char * argv[])
 	freeaddrinfo(addr);
 	
 	//Checks if WiringPi is set up
-	if (wiringPiSetupGpio() == -1)
-	{
-		printf("WiringPi Setup Error\n");
-		return -1;
-	}
+	//if (wiringPiSetupGpio() == -1)
+	//{
+		//printf("WiringPi Setup Error\n");
+		//return -1;
+	//}
 	
 	//Arduino esque things used from WiringPi that sends the mode
 	//of the pins assigned (17 and 12 respectively)
-	pinMode(JOYSTICK_PIN_X, INPUT);
-	pinMode(MOTOR_PWM_PIN, PWM_OUTPUT);
+	//pinMode(JOYSTICK_PIN_X, INPUT);
+	gpioSetMode(JOYSTICK_PIN_X, PI_INPUT);
+	//pinMode(MOTOR_PWM_PIN, PWM_OUTPUT);
+	gpioSetMode(MOTOR_PWM_PIN, PI_INPUT);
 	
 	process_commands(sockfd, &server_addr);
 	

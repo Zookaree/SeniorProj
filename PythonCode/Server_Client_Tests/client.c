@@ -1,5 +1,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <pigpio.h>
+#include <signal.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,8 +12,7 @@
 #include <fcntl.h>
 //#include <wiringPi.h> 
 #include <arpa/inet.h>
-#include <pigpio.h>
-#include <signal.h>
+
 
 #define UDP_IP "127.0.0.1"//"192.168.1.10"
 #define UDP_PORT 9931
@@ -45,11 +46,10 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 	char response[4096];//Response array 
 	int status = 0;		
 	int recv_len = 0;
-	int send_len = 0;
-	int slen = sizeof(server_addr);
+	//int slen = sizeof(server_addr);
 	int last = 0;
-	int gpioResult = 0;
-	char *token = 0;	
+	
+	//char *token = 0;	
 	char copy[200];		//Copy of Command Array
 	char joystickStr[64];
 	printf("cmd> ");
@@ -61,7 +61,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 		if (cmd[last] == '\n')
 			cmd[last] = 0;
 		strcpy(copy, cmd);
-		token = strtok(cmd, " ");
+		//token = strtok(cmd, " ");
 		if (strcmp(cmd, "exit") == 0)
 			break;
 		else if (strcmp(cmd, "test") == 0)
@@ -97,13 +97,6 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				perror("send to server failed");
 				exit(1);
 			}
-			gpioResult = gpioInitialise();
-			if (gpioResult == PI_INIT_FAILED)
-			{
-				perror("gpioInitialise failed");
-				exit(1);
-			}
-			
 			while (1)
 			{
 				//printf("Printing 'run' statement: ");
@@ -116,7 +109,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 					exit(1);
 				}
 				//Joystick Code using WiringPi
-				int joystickVal = digitalRead(JOYSTICK_PIN_X);
+				int joystickVal = gpioRead(JOYSTICK_PIN_X);
 				if (joystickVal == 1)
 				{
 					if (loopVal > 1500)
@@ -158,7 +151,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 
 int main(int argc, char * argv[])
 {
-
+	int gpioResult = 0;
 	//create a socket 
 	int sockfd;
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -192,6 +185,13 @@ int main(int argc, char * argv[])
 	server_addr.sin_port = htons(UDP_PORT);
 	
 	freeaddrinfo(addr);
+	
+	gpioResult = gpioInitialise();
+	if (gpioResult == PI_INIT_FAILED)
+	{
+		perror("gpioInitialise failed");
+		exit(1);
+	}
 	
 	//Checks if WiringPi is set up
 	//if (wiringPiSetupGpio() == -1)

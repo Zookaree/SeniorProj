@@ -1,7 +1,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <pigpio.h>
-#include <signal.h>
+//#include <pigpio.h>
+//#include <signal.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,18 +10,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-//#include <wiringPi.h> 
+#include <wiringPi.h> 
 #include <arpa/inet.h>
-
-<<<<<<< HEAD
 
 #define UDP_IP "127.0.0.1"//"192.168.1.10"
 #define UDP_PORT 9931
-=======
-#define UDP_IP "127.0.0.1"
-#define UDP_PORT 2345
->>>>>>> parent of 544ddf8 (Updated Addresses)
-
 #define JOYSTICK_PIN_X 17 	//GPIO 17
 #define MOTOR_PWM_PIN 12 	//GPIO 12
 #define PWM_MIN 1100		//Full Reversal Motor Val
@@ -191,12 +184,12 @@ int main(int argc, char * argv[])
 	
 	freeaddrinfo(addr);
 	
-	gpioResult = gpioInitialise();
-	if (gpioResult == PI_INIT_FAILED)
-	{
-		perror("gpioInitialise failed");
-		exit(1);
-	}
+	//gpioResult = gpioInitialise();
+	//if (gpioResult == PI_INIT_FAILED)
+	//{
+		//perror("gpioInitialise failed");
+		//exit(1);
+	//}
 	
 	Checks if WiringPi is set up
 	if (wiringPiSetupGpio() == -1)

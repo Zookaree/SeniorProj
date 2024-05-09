@@ -121,7 +121,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 				
 				pwmVal = map(joystickVal, 0, 1023, loopVal, PWM_MAX);
 				
-				//pwmWrite(MOTOR_PWM_PIN, pwmVal); //PWMWrite is Arduino taken implemented into C
+				pwmWrite(MOTOR_PWM_PIN, pwmVal); //PWMWrite is Arduino taken implemented into C
 				
 				printf("Joystick X-axis val: %d, PWM Val: %d\n", joystickVal, pwmVal);
 				
@@ -193,19 +193,19 @@ int main(int argc, char * argv[])
 		exit(1);
 	}
 	
-	//Checks if WiringPi is set up
-	//if (wiringPiSetupGpio() == -1)
-	//{
-		//printf("WiringPi Setup Error\n");
-		//return -1;
-	//}
+	Checks if WiringPi is set up
+	if (wiringPiSetupGpio() == -1)
+	{
+		printf("WiringPi Setup Error\n");
+		return -1;
+	}
 	
 	//Arduino esque things used from WiringPi that sends the mode
 	//of the pins assigned (17 and 12 respectively)
-	//pinMode(JOYSTICK_PIN_X, INPUT);
-	gpioSetMode(JOYSTICK_PIN_X, PI_INPUT);
-	//pinMode(MOTOR_PWM_PIN, PWM_OUTPUT);
-	gpioSetMode(MOTOR_PWM_PIN, PI_INPUT);
+	pinMode(JOYSTICK_PIN_X, INPUT);
+	//gpioSetMode(JOYSTICK_PIN_X, PI_INPUT);
+	pinMode(MOTOR_PWM_PIN, PWM_OUTPUT);
+	//gpioSetMode(MOTOR_PWM_PIN, PI_INPUT);
 	
 	process_commands(sockfd, &server_addr);
 	

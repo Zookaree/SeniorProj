@@ -107,7 +107,7 @@ void process_commands(int sock, struct sockaddr_in *server_addr)
 					exit(1);
 				}
 				//Joystick Code using WiringPi
-				int joystickVal = gpioRead(JOYSTICK_PIN_X);
+				int joystickVal = digitalRead(JOYSTICK_PIN_X);
 				if (joystickVal == 1)
 				{
 					if (loopVal > 1500)
@@ -191,7 +191,7 @@ int main(int argc, char * argv[])
 		//exit(1);
 	//}
 	
-	Checks if WiringPi is set up
+	//Checks if WiringPi is set up
 	if (wiringPiSetupGpio() == -1)
 	{
 		printf("WiringPi Setup Error\n");

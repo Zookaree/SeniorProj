@@ -105,7 +105,7 @@ def proc_request(cmd, sock, requester) :
         send_response("Test sent", sock, requester)
     elif cmd[0] == "run":
         print("WALL-C Activated")
-        print("we made it here")
+        #print("we made it here")
         while True:
             
             #Distance Data being sent via JSON
@@ -118,7 +118,7 @@ def proc_request(cmd, sock, requester) :
             tempThrottleVal = int(receivedBytes[0].decode())#.strip('\x00'))
             print(tempThrottleVal)
             set_throttle(tempThrottleVal)
-            print("we set throttle again?")
+            #print("we set throttle again?")
             #set_throttle(int(receivedBytes[0].decode()))
     elif cmd[0] == "exit":
         #this command exits the server-client socket

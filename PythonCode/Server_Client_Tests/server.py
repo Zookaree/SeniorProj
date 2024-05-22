@@ -93,10 +93,8 @@ def send_response(response, sock, destination) :
 #client that is requesting the data being sent to it)
 def proc_request(cmd, sock, requester) : 
     #convert the cmd to a string
-    #sensorData = sock
     cmd = bytes.decode(cmd, 'utf-8')
     now = datetime.datetime.now()
-    #sensorDistance = {'distance' : distanceData()}
     print(now, "Processing: " + cmd)
     cmd = cmd.split()
     if cmd[0] == "test":

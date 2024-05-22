@@ -22,9 +22,9 @@
 #define NEUTRAL_PWM 1500	//Neutral Motor Val
 
 //PHY pin 29, 31, 37
-#define LED0_GPIO 5;
-#define LED1_GPIO 6;
-#define LED2_GPIO 26;
+#define LED0_GPIO 5
+#define LED1_GPIO 6
+#define LED2_GPIO 26
 
 int checkVal = 0;
 int pwmVal = 0;
@@ -159,11 +159,6 @@ int main(int argc, char * argv[])
 	memset((char *)&myaddr, 0, sizeof(myaddr));
 	myaddr.sin_family = AF_INET;
 	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-	//if(inet_pton(AF_INET, UDP_IP, &myaddr.sin_addr) <= 0)
-	//{
-		//perror("Inet_pton");
-		//exit(1);
-	//}
 	myaddr.sin_port = htons(UDP_PORT); //requests a port
 	
 	bind(sockfd, (struct sockaddr *)&myaddr, sizeof(myaddr));
@@ -183,14 +178,7 @@ int main(int argc, char * argv[])
 	server_addr.sin_port = htons(UDP_PORT);
 	
 	freeaddrinfo(addr);
-	
-	//gpioResult = gpioInitialise();
-	//if (gpioResult == PI_INIT_FAILED)
-	//{
-		//perror("gpioInitialise failed");
-		//exit(1);
-	//}
-	
+
 	//Checks if WiringPi is set up
 	if (wiringPiSetupGpio() == -1)
 	{
@@ -204,6 +192,9 @@ int main(int argc, char * argv[])
 	//gpioSetMode(JOYSTICK_PIN_X, PI_INPUT);
 	pinMode(MOTOR_PWM_PIN, PWM_OUTPUT);
 	//gpioSetMode(MOTOR_PWM_PIN, PI_INPUT);
+	pinMode(LED0_GPIO, OUTPUT);
+	pinMode(LED1_GPIO, OUTPUT);
+	pinMode(LED2_GPIO, OUTPUT);
 	
 	process_commands(sockfd, &server_addr);
 	

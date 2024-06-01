@@ -16,7 +16,8 @@ import pigpio
 #Will also need to incoroporate some other libraries to consider
 #other items such as joystick, etc.
 
-UDP_IP = '127.0.0.1'#'192.168.1.8'
+# UDP_IP = '127.0.0.1'
+UDP_IP = '192.168.1.127'
 global UDP_PORT
 UDP_PORT = 9931
 BUFF_SIZE = 1024
